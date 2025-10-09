@@ -1,0 +1,112 @@
+---
+title: "Exercício 1 - Eficiência ADM"
+author: "Felipe Gonçalves Pereira"
+date: "09/10/2025"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r dea}
+# install.packages("Benchmarking")
+library(Benchmarking)
+
+# === 1) Dados: DMUs nas linhas, variáveis nas colunas ===
+X <- matrix(
+  c(8,11,
+    14,12,
+    11,18,
+    16,30,
+    24,26,
+    36,40),
+  ncol = 2, byrow = TRUE
+)
+
+Y <- matrix(
+  c(42,69,
+    24,75,
+    120,72,
+    80,168,
+    120,32,
+    88,120),
+  ncol = 2, byrow = TRUE
+)
+
+rownames(X) <- rownames(Y) <- paste0("DMU", 1:nrow(X))
+colnames(X) <- c("Inp1","Inp2")
+colnames(Y) <- c("Out1","Out2")
+
+```
+
+
+
+```{r dea}
+
+# === 2) DEA CCR (CRS), orientação a insumo, com dual e slacks ===
+ET_CRS <- dea(X, Y, RTS = "crs", ORIENTATION = "in", DUAL = TRUE, SLACK = TRUE)
+
+# === 3) Resultados básicos ===
+# Eficiências (theta)
+theta <- eff(ET_CRS)            # vetor n x 1
+
+# Peers (conjunto de referência) e lambdas
+P <- peers(ET_CRS)              # lista de peers por DMU
+L <- lambda(ET_CRS)             # matriz n x n (coluna i = lambdas para DMU i)
+
+# Pesos (multiplicadores) do modelo dual
+# Obs: no Benchmarking os slots são ux (pesos de saída) e vy (pesos de entrada)
+# (mantendo sua convenção)
+ux <- ET_CRS$ux
+vy <- ET_CRS$vy
+
+# Slacks (sobras) de insumo e produto
+sx <- ET_CRS$sx                 # n x m
+sy <- ET_CRS$sy                 # n x s
+
+# Pegue os lambdas do objeto e garanta que é matriz
+L <- ET_CRS$lambda
+if (is.null(dim(L))) {
+  L <- matrix(L, nrow = nrow(X), ncol = 1)     # caso raro: veio vetor
+}
+rownames(L) <- rownames(X)
+colnames(L) <- rownames(X)[seq_len(ncol(L))]   # alinha nomes das colunas
+
+# String de peers com pesos (evita "índice fora de limites")
+peer_str <- sapply(seq_len(ncol(L)), function(i) {
+  idx <- which(L[, i, drop = FALSE] > 1e-8)
+  if (length(idx) == 0) return("")
+  paste0(rownames(X)[idx], "(", round(L[idx, i, drop = FALSE], 3), ")",
+         collapse = ", ")
+})
+
+# Tabela final (agora sem erro)
+MetasF <- data.frame(
+  DMU        = colnames(L),
+  eficiencia = round(eff(ET_CRS)[seq_len(ncol(L))], 4),
+  peers      = peer_str,
+  row.names  = NULL
+)
+
+MetasF
+L           # matriz de lambdas
+
+
+```
+
+Como ler seu L atual (exemplos):
+
+- Coluna DMU1: λ(DMU1)=1 → DMU1 é eficiente (ela mesma é referência).
+- Coluna DMU2: λ(DMU1)=1.086957 → DMU2 projeta-se na fronteira “sobre a DMU1”.
+(Em CRS, a soma dos λ pode passar de 1; em VRS somaria 1.)
+- Coluna DMU3: λ(DMU3)=1 e λ(DMU5)=1 → a referência é a combinação de DMU3 e DMU5.
+- Coluna DMU6: λ(DMU1)=1.534247 e λ(DMU3)=0.196347 → referência usa DMU1 e DMU3.
+
+Dicas
+
+Quer lambdas que somem 1 (combinação convexa)? Rode o mesmo modelo com RTS = "vrs". Para gráficos da fronteira e projeções, posso te mandar um plot rápido com as DMUs, a fronteira CCR e as setas de projeção.
+
+
