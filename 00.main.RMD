@@ -110,7 +110,7 @@ Dicas
 Quer lambdas que somem 1 (combinação convexa)? Rode o mesmo modelo com RTS = "vrs". Para gráficos da fronteira e projeções, posso te mandar um plot rápido com as DMUs, a fronteira CCR e as setas de projeção.
 
 
-```{r}
+```{exercicio_1}
 # install.packages("Benchmarking")
 library(Benchmarking)
 
@@ -212,6 +212,37 @@ print(out_tab)
 
 
 ```
+
+
+Exercicio II
+
+Calcular: TMS (utilizando os pesos), input e output
+
+
+
+```{exercicio_II}
+
+library(Benchmarking)
+X <- matrix(c(100,100,100,100,100,100,100), ncol = 1) 
+# preenche a matriz por coluna (by column é o padrão)
+Y <- matrix(c(42,70,24,75,120,72,130,180,168,120,32,88,120, 50),ncol = 2)
+y1 <- matrix(c(42,70,24,75,120,72,130), ncol = 1)
+y2 <- matrix(c(180,168,120,32,88,120,50), ncol = 1)
+dea.plot.transform (y1,y2, RTS = "crs", txt=1:dim(rec)[1], GRID=T)
+E_IO <- dea(X,Y, RTS="crs", ORIENTATION = "out", DUAL = TRUE, SLACK =TRUE)
+eff(E_IO)
+E_IO$ux
+E_IO$vy
+E_IO$vy[,1]/E_IO$vy[,2] 
+
+## Modelo orientado aos outputs
+E_OO <- dea(X,Y, RTS="crs", ORIENTATION = "out", DUAL = TRUE, SLACK =TRUE)
+eff(E_OO)
+E_OO$ux
+E_OO$vy
+
+```
+
 
 
 
