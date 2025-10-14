@@ -246,62 +246,33 @@ E_OO$vy
 
 Calcular: TMS (utilizando os pesos), input e output
 
-```{exercicio_II_a}
+```{r exercicio_II_a}
 # Pacote
 library(Benchmarking)
 
 # ---------- Dados ----------
-X <- matrix(c(100,100,100,100,100,100,100), ncol = 1)  # 1 input
-Y <- matrix(c(
-  42, 70, 24, 75,120, 72,130,   # y1 (7 observações)
- 180,168,120, 32, 88,120, 50    # y2 (7 observações)
-), ncol = 2, byrow = FALSE)      # preenche por coluna (y1 é a 1ª col)
+#Insumos
+X <- matrix(c(8,11,14,12,11,18,16,30,24,26,36,40), ncol = 2)
+# Produtos
+Y <- matrix(c(42,69,24,75,120,72,80,168,120,32,88,120),ncol = 2, byrow = FALSE)
 
-colnames(X) <- "x1"
-colnames(Y) <- c("y1","y2")
-n <- nrow(Y)
+#olnames(X) <- "x1"
+#olnames(Y) <- "y1"
+#n<- nrow(Y)
+ET_CRS <- dea(X,Y,RTS = 'crs', ORIENTATION = 'out', DUAL = TRUE, SLACK = TRUE)
+eff(ET_CRS) # Para identificar as eficiências estimadas
+peers(ET_CRS) #Para identificar as DMUs eficientes bechmarks
+lambda(ET_CRS) # Para identificar os n alfas
 
-# ---------- Visual (fronteira em y1 x y2) ----------
-# (corrige 'rec' inexistente; usa n como número de DMUs)
-dea.plot.transform(y = Y[,1], x = Y[,2], RTS = "crs", txt = 1:n, GRID = TRUE)
-# Obs: para um gráfico direto y1 x y2 sem transformar:
-plot(Y[,1], Y[,2], pch = 19); text(Y[,1], Y[,2], labels = 1:n, pos = 3)
+#Se quiser ver o valor dos pesos dos insumos
+ET_CRS$ux
+ET_CRS$vy
 
-# ---------- DEA orientado a INSUMO (In) ----------
-E_IN <- dea(X, Y, RTS = "crs", ORIENTATION = "in", DUAL = TRUE, SLACK = TRUE)
-eff_in  <- eff(E_IN)     # eficiências (θ)
-u_in    <- E_IN$ux       # pesos de input (u)
-v_in    <- E_IN$vy       # pesos de output (v) do problema dual
-
-# ---------- DEA orientado a PRODUTO (Out) ----------
-E_OUT <- dea(X, Y, RTS = "crs", ORIENTATION = "out", DUAL = TRUE, SLACK = TRUE)
-eff_out <- eff(E_OUT)    # eficiências (φ)
-u_out   <- E_OUT$ux      # pesos de input (u)
-v_out   <- E_OUT$vy      # pesos de output (v)
-
-# ---------- TMS entre outputs (usando pesos v) ----------
-# Interpretação: TMS_y1,y2 = v_y1 / v_y2 = quanto de y2 "vale" 1 unidade de y1 na fronteira (sombra).
-TMS_in   <- v_in[,1]  / v_in[,2]   # TMS obtida no modelo orientado a insumo
-TMS_out  <- v_out[,1] / v_out[,2]  # TMS obtida no modelo orientado a produto
-
-# ---------- Tabela resumo ----------
-res <- data.frame(
-  DMU      = 1:n,
-  eff_in   = round(eff_in, 4),
-  eff_out  = round(eff_out, 4),
-  vy1_in   = round(v_in[,1], 6),
-  vy2_in   = round(v_in[,2], 6),
-  TMS_in   = round(TMS_in, 6),
-  vy1_out  = round(v_out[,1], 6),
-  vy2_out  = round(v_out[,2], 6),
-  TMS_out  = round(TMS_out, 6)
-)
-print(res, row.names = FALSE)
-
-# Dica: se quiser a TMS apenas para DMUs eficientes, filtre por eff==1 (no respectivo modelo).
-# subset(res, eff_out == 1)  # por exemplo, para a TMS do modelo orientado a produto
+s1 <- slack(X,Y,ET_CRS) #para calcular e visualizar os alacks
 
 ```
+
+
 
 
 
