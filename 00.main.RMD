@@ -244,9 +244,7 @@ E_OO$vy
 ```
 
 
-Calcular: TMS (utilizando os pesos), input e output
-
-```{exercicio_II_a}
+```{r exercicio_II_a}
 # Pacote
 library(Benchmarking)
 
