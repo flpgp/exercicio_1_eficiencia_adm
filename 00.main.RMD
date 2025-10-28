@@ -244,11 +244,9 @@ E_OO$vy
 ```
 
 
-<<<<<<< HEAD
 =======
 Calcular: TMS (utilizando os pesos), input e output
 
->>>>>>> 3bdb3d18a3c1ece68c390aee960db40b597a4139
 ```{r exercicio_II_a}
 # Pacote
 library(Benchmarking)
@@ -276,7 +274,100 @@ s1 <- slack(X,Y,ET_CRS) #para calcular e visualizar os alacks
 ```
 
 
+Aula 21 de Outubro de 2025
+
+```{r exercicio_II_a}
+
+library(readr)
+DadosExercicio <- read_delim("00.dados/DadosExercicio.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+library(Benchmarking)
+X <-matrix(c(DadosExercicio$x1,DadosExercicio$x2),ncol = 2)
+Y <-matrix(c(DadosExercicio$y))
+#grafico
+dea.plot.isoquant(X[,1],X[,2],txt=1:dim(X)[1],GRID=T)
+# Calculo Eficiência 
+E <- dea(X,Y,RTS = 'CRS',ORIENTATION = "in",DUAL = TRUE, SLACK = TRUE)
+arrows(X[,1],X[,2],(X*E$eff)[,1],(X*E$eff)[,2],lty="dashed",col ="red")
+arrows(6,1,5,1,lty="dashed",col ="red")
+
+eff(E) #Para identificar as eficiências estimadas.
+peers(E) #Para idenitifcar as DMUs eficientes bechmarks.
+lambda(E)#Para identificar os n ???
+#Se quiser ver o valor dos pesos dos insumos
+E$ux
+E$vy
+
+E$ux[,1]/E$ux[,2]#taxa marginal de substituição técnica (TMST)
+sl <- slack(X,Y,E) #Para calcular e visualizar os slacks.
+E$sx
+E$sy
+
+MetasF <- (X*eff(E))-E$sx #Para calcular e visualizar as metas de melhorias.
+MetasF
+
+rec2 <- matrix(c(2,5, 2,1.5,2,2,3,2,3,1,4,1,0.5,5),ncol = 2,byrow = TRUE)
+prod <- matrix(1,nrow=dim(rec)[1])
+dea.plot.isoquant(rec2[,1],rec[,2],txt=1:dim(rec)[1],GRID=T)
+```
+
+
+Aula 28 de outubro de 2025
+```{r exercicio_II_b}
+#Retorno Variável de escala - Aula 23/10/
+#exercício
+#   X    Y
+#A 150  80
+#B 250  100
+#C 300  300
+#D 500  400
+#E 500  150
+
+# rodar com as duas orintações
+# rodar o modelo de retorno variável de escala
+# plotar o gráfico -  #dea.plot.frontier()
+library(Benchmarking)
+#dados
+X <- matrix(c(120,250,300,500,500), ncol=1)
+Y <- matrix (c(80,100,300,400,150), ncol=1)
+#Grafico
+dea.plot(X,Y,RTS="vrs",ORIENTATION="in-out",txt= LETTERS[1:length(X)],GRID=T)
+dea.plot(X,Y,RTS="crs",ORIENTATION = "in-out", add=TRUE, lty = "dashed",col="red")
+
+
+# Modelo orientado aos insumos (input-oriented)
+E_CCR <- dea(X, Y, RTS = "vrs", ORIENTATION = "in", DUAL = TRUE, SLACK = TRUE)
+E_CCR$eff
+# Modelo orientado aos produtos (output-oriented)
+E_BCC <- dea(X, Y, RTS = "vrs", ORIENTATION = "out", DUAL = TRUE, SLACK = TRUE)
+E_BCC$eff
+
+arrows(X,Y, (X*E_CCR$eff),Y,lty = "dashed", col = "blue")
+arrows(X,Y,(X*E_BCC$eff),Y,lty = "dashed", col="green")
+
+peers(E_BCC)# Para identificar as DMUs eficientes bechmarks
+lambda(E_BCC)# Para identificar os n ????
+
+E_BCC$ux
+E_BCC$vy
+E_BCC$ux/E_BCC$vy # produtividade marginal de um fator
+# Na teoria microeconomica, a produtividade marginal de um fator de produção (também chamada de produto marginal) mede quanto a produção total varia quando se aumenta uma unidade de um fator, mantendo os demais fatores constantes.
+
+# Calcular a eficiência de escala
+EE <- E_CCR$eff/E_BCC$eff
+EE*X
+
+E_BCC_00 <- dea(X,Y, RTS = "vrs", ORIENTATION = "out", DUAL = TRUE, SLACK = TRUE)
+E_BCC_00$eff
+peers(E_BCC_00) # Para identificar as DMUs eficientes benchmarks.
+lambda(E_BCC_00)# Para identificar os n ???
+
+#Se quiser ver o valor dos pesos dos insumos 
+E_BCC_00$ux
+E_BCC_00$vy
 
 
 
+```
 
