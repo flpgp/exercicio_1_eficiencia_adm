@@ -376,8 +376,94 @@ E_BCC_00$vy
 
 ```{r}
 
+#Eficiencia de custo e alocativa
+
+I <- matrix(c(2,2,5,10,10,3,12,8,5,4,6,12), ncol=2)
+O <- matrix(rep(1,6), ncol=1)
+W <- matrix(c(1.5,1), ncol=2)
+et <- dea(I,O,RTS="crs")
+iopt <- cost.opt(I,O,W,RTS="crs")
+cobs <- I%*%t(W) #
+copt <- iopt$xopt %*% t(W)
+ec <- copt/cobs
+ea <- ec/et$eff
+cbind(ec,et$eff, ea)
 
 
+```
+
+# Maximizar receita
+```{r}
+i1 <- matrix(c(2,2,5,10,10,3))
+i2 <- matrix(c(12,8,5,4,6,12))
+o <- matrix(c(1,1,1,1,1,1), ncol=1)
+dea.plot.isoquant(i1,i2,xlab="i1",ylab="i2", txt=LETTERS[1:length(i1)])
+lines(c(0,i1[6],c(0,i2[6]),lty="dotted"))
+lines(c(0,I1[5],c(0,i2[5],lty="dotted"))
+lines(c(7.3333,0), c(0,11),lty="dotted")
+
+```
+
+
+
+# Supereficiência
+
+Quado há muitas DMU's efeiciente e queremos achar as supereficientes.
+
+
+
+```{r}
+
+#script no R para calcular a supereficiência
+library(Benchmarking)
+# definir os inputs
+X <- matrix(c(20,40,40,60,70,50), ncol=1, dimnames = list(LETTERS[1:6],"X"))
+#Definir os outputs
+Y <- matrix(c(20,30,50,40,60,20), ncol = 1, dimnames= list(LETTERS[1:6],"Y"))
+#gráficos
+dea.plot(X,Y,RTS="vrs",ORIETATION = "in-out", txt=rownames(X))
+
+dea.plot(X,Y,RTS="crs",ORIETATION = "in-out", add=TRUE, lty="dotted")
+#calcular da eficiência 
+e<- dea(X,Y, RTS="vrs",ORIETATION="in"): eff(e)
+# calcular a super efficiency
+esuper_IO <- sdea(X,Y,RTS="vrs",ORIENTATION="in")
+esuper_IO$eff
+print(peers(esuper_IO,NAMES=TRUE), quote = FALSE)
+esuper_OO <- sdea(X,Y,RTS="vrs",ORIETATION="out")
+esuper_OO
+print(peers(esuper_OO,NAMES=TRUE),quote = FALSE)
+#Super-eficiência retirando a DMU 3=C
+
+```
+
+
+# Malmquist Index
+
+```{r}
+
+library(deaR)
+data_example_1 <- data("Economy")
+
+#Este objeto (dataset-conjunto)
+data("EconomyLong")
+
+data_example_1 <- make_malmquist(Economy, nper = 5, arrangement = "horizontal", ni = 2, no =1)
+result1 <- malmquist_index(data_example_1, orientation = "oo",rts = "crs")
+
+mi <- result1$mi
+effch <-result1$ec
+tech <- result1$tc
+summary(result1)
+
+
+data_example_2 <- make_malmquist(EconomyLong, percol = 2, arrangement = "vertical", ni=2, no=1)
+
+result2 <- malmquist_index(data_example_2,rts = "crs")
+mi <- result2$mi
+effch <- result2$ec
+tech <- result2$tc
+summary(result2)
 
 ```
 
